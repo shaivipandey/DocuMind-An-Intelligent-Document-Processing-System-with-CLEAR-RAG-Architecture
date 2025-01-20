@@ -1,153 +1,169 @@
-# AI-Powered Document Management System
+# CLEAR-RAG: Advanced Document Intelligence System
+### Developed by Shaivi Pandey | [GitHub](https://github.com/shaivipandey)
 
-A simple yet powerful document management system that uses AI to process, summarize, and enable semantic search across PDF documents.
+A sophisticated document management system powered by Entity-Augmented Retrieval Architecture (CLEAR-RAG) for intelligent processing, summarization, and semantic search across multiple document formats.
 
-## Features
+## Key Features
 
-- PDF document upload and text extraction
-- Advanced RAG (Retrieval Augmented Generation) implementation:
-  - Document chunking with overlapping segments for better context preservation
-  - Hybrid search combining dense (embeddings) and sparse (BM25) retrieval
+- Multi-Format Document Processing:
+  - PDF document processing with advanced text extraction
+  - HTML content processing with metadata preservation
+  - Image processing with OCR capabilities
+  
+- CLEAR-RAG Architecture:
+  - Entity-Based Processing for precise information retrieval
+  - Hybrid Vector Search combining dense and sparse retrieval
+  - Multi-Modal Analysis for comprehensive document understanding
+  - Intelligent Context Retrieval with metadata enhancement
+  
+- Advanced AI Capabilities:
+  - Document chunking with overlapping segments
   - Cross-attention based reranking using GPT-3.5
-  - Metadata-enhanced document chunks for improved context
-- Automatic document summarization using GPT-3.5
-- RESTful API interface
+  - Zero-shot and few-shot learning capabilities
+  - Automatic document summarization
+  
+- Interactive Interface:
+  - Streamlit-based user interface
+  - Real-time document processing
+  - Interactive Q&A functionality
+  - Document statistics and insights
 
-## Prerequisites
+## Technical Stack
 
-- Python 3.8+
-- OpenAI API key
-- Virtual environment (recommended)
+- **Core Technologies:**
+  - Python 3.8+
+  - OpenAI API integration
+  - Streamlit for frontend
+  - PyPDF2 for PDF processing
+  
+- **AI/ML Components:**
+  - OpenAI's GPT-3.5 for summarization
+  - text-embedding-ada-002 for embeddings
+  - BERT-based models for domain tasks
+  - Custom NER implementation
+  
+- **Processing Pipeline:**
+  - Document chunking system
+  - Entity recognition module
+  - Vector search implementation
+  - Hybrid retrieval system
 
-## Setup
+## Installation & Setup
 
-1. Clone the repository and navigate to the project directory:
+1. **Environment Setup:**
+   ```bash
+   cd code
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
 
-```bash
-cd code
-```
+2. **Configuration:**
+   ```bash
+   cp .env.example .env
+   # Edit .env and add required API keys:
+   # OPENAI_API_KEY=your_api_key_here
+   ```
 
-2. Create and activate a virtual environment:
+3. **Additional Requirements:**
+   - Tesseract OCR for image processing
+   - NLTK data for text processing
+   - Sufficient RAM for large document processing
 
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows, use: venv\Scripts\activate
-```
+## Usage
 
-3. Install dependencies:
+1. **Start the Application:**
+   ```bash
+   streamlit run app.py
+   ```
+   Access the interface at `http://localhost:8501`
 
-```bash
-pip install -r requirements.txt
-```
+2. **Document Processing:**
+   - Upload documents (PDF/HTML/Images)
+   - View real-time processing status
+   - Access generated summaries
+   - Interact with Q&A system
 
-4. Set up environment variables:
+3. **Advanced Features:**
+   - Entity-based search
+   - Context-aware responses
+   - Multi-format support
+   - Processing statistics
 
-```bash
-cp .env.example .env
-```
+## Project Architecture
 
-Edit `.env` and add your OpenAI API key:
+### Core Components:
+- `app.py`: Streamlit interface and main application logic
+- `document_processor.py`: Multi-format document processing
+- `document_chunker.py`: Advanced chunking with metadata
+- `html_processor.py`: HTML content processing
+- `image_processor.py`: Image processing with OCR
+- `summarizer.py`: GPT-3.5 based summarization
+- `vector_search.py`: Hybrid search implementation
 
-```
-OPENAI_API_KEY=your_api_key_here
-```
+### Directory Structure:
+- `code/`: Source code and application logic
+- `dataset/`: Document storage and management
+- `output/`: Processed results and embeddings
 
-## Running the Application
+## CLEAR-RAG Implementation
 
-Start the FastAPI server:
+### Entity Processing:
+- Named Entity Recognition (NER)
+- Entity-based context retrieval
+- Metadata preservation
+- Positional tracking
 
-```bash
-uvicorn app:app --reload
-```
+### Search Architecture:
+- Dense Retrieval: OpenAI embeddings
+- Sparse Retrieval: BM25 algorithm
+- Hybrid Scoring System
+- Cross-Attention Reranking
 
-The API will be available at `http://localhost:8000`
+### Performance Features:
+- Efficient token usage
+- Optimized processing time
+- Smart chunking system
+- Caching mechanisms
 
-## API Endpoints
+## Performance & Optimization
 
-### Upload Document
-```http
-POST /upload/
-```
-Upload a PDF document for processing. The system will:
-- Extract text from the PDF
-- Generate a summary using GPT-3.5
-- Create document embeddings for search
+### Processing Efficiency:
+- Optimized token usage
+- Reduced API calls
+- Smart caching system
+- Memory management
 
-### List Documents
-```http
-GET /documents/
-```
-Get a list of all processed documents and their metadata.
+### Error Handling:
+- Comprehensive error detection
+- Graceful failure recovery
+- Input validation
+- System state management
 
-### Search Documents
-```http
-GET /search/?query=your_search_query&top_k=5
-```
-Search through documents using semantic similarity. Parameters:
-- `query`: Your search query
-- `top_k`: Number of results to return (default: 5)
+## Future Roadmap
 
-## Project Structure
+### Planned Enhancements:
+- Advanced authentication system
+- Extended document format support
+- Batch processing capabilities
+- Enhanced visualization features
+- API endpoint expansion
+- Performance optimizations
 
-- `app.py`: Main FastAPI application and API endpoints
-- `document_processor.py`: PDF text extraction functionality
-- `document_chunker.py`: Advanced document chunking with metadata
-- `summarizer.py`: Document summarization using OpenAI's GPT-3.5
-- `vector_search.py`: Hybrid search implementation (dense + sparse) with reranking
-- `requirements.txt`: Project dependencies
-- `.env`: Configuration for API keys (not in version control)
+### Research Directions:
+- Advanced entity recognition
+- Improved context understanding
+- Enhanced multi-modal processing
+- Real-time processing optimization
 
-## RAG Implementation Details
+## Contributing
 
-### Document Chunking
-- Implements overlapping chunks to preserve context across segment boundaries
-- Maintains document metadata and positional information
-- Configurable chunk size and overlap parameters
+Contributions are welcome! Please feel free to submit pull requests or open issues for improvements and bug fixes.
 
-### Hybrid Search
-- Dense Retrieval: Uses OpenAI embeddings for semantic similarity
-- Sparse Retrieval: Implements BM25 algorithm for keyword matching
-- Score Combination: Weighted combination of dense and sparse scores
-- Cross-Attention Reranking: Uses GPT-3.5 to rerank results based on relevance
+## License
 
-### Vector Search
-- Embedding Model: OpenAI's text-embedding-ada-002
-- Similarity Metric: Cosine similarity
-- Caching: Persistent storage of embeddings for efficiency
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Example Usage
+## Acknowledgments
 
-1. Start the server
-2. Upload a PDF document:
-```bash
-curl -X POST -F "file=@your_document.pdf" http://localhost:8000/upload/
-```
-
-3. Search documents:
-```bash
-curl "http://localhost:8000/search/?query=your search query"
-```
-
-## Directory Structure
-
-The system uses two main directories:
-- `dataset/`: Stores uploaded PDF files
-- `output/`: Stores processed text, metadata, and embeddings
-
-## Error Handling
-
-The API includes comprehensive error handling for:
-- Invalid file types
-- Processing errors
-- API failures
-- File system errors
-
-## Future Improvements
-
-Potential enhancements:
-- Support for more document types (Word, Images with OCR)
-- User authentication
-- Document versioning
-- Web interface
-- Batch processing
-- Export functionality
+Special thanks to the open-source community and the developers of the various libraries and tools that made this project possible.
