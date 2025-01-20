@@ -1,32 +1,106 @@
 import streamlit as st
-import PyPDF2
 import requests
 from dotenv import load_dotenv
 import os
 import json
+from document_processor import document_processor
 
 # Load environment variables
 load_dotenv()
 
 # Configure page
-st.set_page_config(page_title="PDF Q&A Assistant", layout="wide")
-st.title("📄 PDF Q&A Assistant")
+st.set_page_config(page_title="Document Q&A Assistant", layout="wide")
+st.title("📄 Document Q&A Assistant")
 
 # Initialize session state
-if "pdf_text" not in st.session_state:
-    st.session_state["pdf_text"] = None
+if "document_text" not in st.session_state:
+    st.session_state["document_text"] = None
 
-def extract_text_from_pdf(pdf_file):
-    """Extract text from uploaded PDF file"""
+# Reset function
+def reset_session():
+    st.session_state["document_text"] = None
+
+def process_uploaded_file(uploaded_file):
+    """Process uploaded file (PDF or HTML)"""
+    temp_path = None
     try:
-        pdf_reader = PyPDF2.PdfReader(pdf_file)
-        text = ""
-        for page in pdf_reader.pages:
-            text += page.extract_text()
-        return text
+        # Save the uploaded file temporarily with proper encoding
+        file_type = uploaded_file.name.lower().split('.')[-1]
+        # Create temporary file in the output directory with absolute path
+        temp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "output"))
+        os.makedirs(temp_dir, exist_ok=True)
+        temp_path = os.path.join(temp_dir, uploaded_file.name)
+        
+        print(f"Processing file: {uploaded_file.name} (type: {file_type})")  # Debug log
+        print(f"Using temporary path: {temp_path}")  # Debug log
+        
+        try:
+            if file_type in ['html', 'htm']:
+                # For HTML files, decode and save with UTF-8 encoding
+                content = uploaded_file.getvalue().decode('utf-8')
+                with open(temp_path, "w", encoding='utf-8') as f:
+                    f.write(content)
+                print(f"Saved HTML content to {temp_path}")  # Debug log
+            else:
+                # For PDFs and other binary files
+                content = uploaded_file.getvalue()
+                print(f"Read {len(content)} bytes from uploaded PDF")  # Debug log
+                with open(temp_path, "wb") as f:
+                    f.write(content)
+                print(f"Saved PDF content to {temp_path}")  # Debug log
+                # Verify the file was written correctly
+                if not os.path.exists(temp_path):
+                    raise Exception("Failed to save temporary file")
+                saved_size = os.path.getsize(temp_path)
+                print(f"Verified saved file size: {saved_size} bytes")  # Debug log
+                if saved_size == 0:
+                    raise Exception("Saved file is empty")
+        except UnicodeDecodeError:
+            st.error("Error: The HTML file must be UTF-8 encoded")
+            return None
+        except Exception as e:
+            st.error(f"Error saving file: {str(e)}")
+            return None
+        
+        st.info(f"Processing {uploaded_file.name}...")
+        
+        try:
+            # Process the file using document processor
+            print(f"Calling document processor for {temp_path}")  # Debug log
+            result = document_processor.process_document(temp_path)
+            if not result:
+                raise Exception("Document processing failed - no result returned")
+            
+            print(f"Document processing result: {result}")  # Debug log
+            
+            # Get the extracted text
+            print(f"Getting text for filename: {result.get('filename', 'NO_FILENAME')}")  # Debug log
+            extracted_text = document_processor.get_document_text(result["filename"])
+            if not extracted_text:
+                raise Exception("No text could be extracted from the document")
+            
+            print(f"Successfully extracted {len(extracted_text)} characters")  # Debug log
+            return extracted_text
+            
+        except Exception as e:
+            st.error(f"Error during document processing: {str(e)}")
+            # Log additional debug information
+            print(f"File type: {file_type}")
+            print(f"Temp path: {temp_path}")
+            print(f"Error details: {str(e)}")
+            return None
+        
     except Exception as e:
-        st.error(f"Error extracting text from PDF: {str(e)}")
+        st.error(f"Error processing file {uploaded_file.name}: {str(e)}")
         return None
+        
+    finally:
+        # Clean up temp file
+        if temp_path and os.path.exists(temp_path):
+            try:
+                os.remove(temp_path)
+            except Exception as e:
+                st.warning(f"Could not remove temporary file: {str(e)}")
 
 def get_openrouter_response(messages, api_key):
     """Get response using OpenRouter API"""
@@ -79,29 +153,36 @@ with st.sidebar:
     st.subheader("How to Use")
     st.write("""
     1. Enter your OpenRouter API key
-    2. Upload a PDF document
+    2. Upload a PDF or HTML document
     3. Click 'Generate Summary' or ask questions
     """)
     
     st.subheader("Features")
     st.write("""
-    - PDF text extraction
+    - PDF and HTML document processing
     - AI-powered summarization
     - Question answering
     - Easy-to-use interface
     """)
 
 # Main content
-st.subheader("1. Upload Your PDF")
-uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
+col1, col2 = st.columns([3, 1])
+with col1:
+    st.subheader("1. Upload Your Document")
+    uploaded_file = st.file_uploader("Choose a PDF or HTML file", type=["pdf", "html", "htm"])
+with col2:
+    st.subheader("Reset")
+    if st.button("Clear Document"):
+        reset_session()
+        st.experimental_rerun()
 
 if uploaded_file is not None:
-    # Extract text from PDF
-    if st.session_state["pdf_text"] is None:
-        with st.spinner("Extracting text from PDF..."):
-            st.session_state["pdf_text"] = extract_text_from_pdf(uploaded_file)
+    # Process the uploaded file
+    if st.session_state["document_text"] is None:
+        with st.spinner("Processing document..."):
+            st.session_state["document_text"] = process_uploaded_file(uploaded_file)
     
-    if st.session_state["pdf_text"]:
+    if st.session_state["document_text"]:
         # Create two columns for summary and Q&A
         col1, col2 = st.columns(2)
         
@@ -111,7 +192,7 @@ if uploaded_file is not None:
                 with st.spinner("Generating summary..."):
                     messages = [
                         {"role": "system", "content": "You are a helpful assistant that creates concise summaries."},
-                        {"role": "user", "content": f"Please summarize this text:\n\n{st.session_state['pdf_text'][:4000]}"}
+                        {"role": "user", "content": f"Please summarize this text:\n\n{st.session_state['document_text'][:4000]}"}
                     ]
                     summary = get_openrouter_response(messages, api_key)
                     if summary:
@@ -124,7 +205,7 @@ if uploaded_file is not None:
                 with st.spinner("Finding answer..."):
                     messages = [
                         {"role": "system", "content": "You are a helpful assistant that answers questions based on the provided context."},
-                        {"role": "user", "content": f"Context: {st.session_state['pdf_text'][:4000]}\n\nQuestion: {question}"}
+                        {"role": "user", "content": f"Context: {st.session_state['document_text'][:4000]}\n\nQuestion: {question}"}
                     ]
                     answer = get_openrouter_response(messages, api_key)
                     if answer:
@@ -134,8 +215,8 @@ if uploaded_file is not None:
         with st.expander("View Extracted Text"):
             st.text_area(
                 label="Document Content",
-                value=st.session_state["pdf_text"],
+                value=st.session_state["document_text"],
                 height=300
             )
 else:
-    st.info("👆 Upload a PDF file to get started!")
+    st.info("👆 Upload a PDF or HTML file to get started!")
