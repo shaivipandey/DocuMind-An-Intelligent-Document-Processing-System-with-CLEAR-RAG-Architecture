@@ -3,6 +3,7 @@ import os
 from typing import Dict, Any
 import json
 from html_processor import html_processor
+from image_processor import image_processor
 
 class DocumentProcessor:
     """
@@ -48,6 +49,8 @@ class DocumentProcessor:
             return 'pdf'
         elif extension in ['html', 'htm']:
             return 'html'
+        elif extension in ['png', 'jpg', 'jpeg', 'tiff', 'bmp']:
+            return 'image'
         else:
             raise ValueError(f"Unsupported file type: {extension}")
 
@@ -119,6 +122,16 @@ class DocumentProcessor:
                     return result
                 except Exception as e:
                     print(f"HTML processing error: {str(e)}")  # Debug log
+                    raise
+            
+            elif file_type == 'image':
+                try:
+                    # Use image processor for image files
+                    result = image_processor.process(file_path)
+                    print(f"Image processing result: {result}")  # Debug log
+                    return result
+                except Exception as e:
+                    print(f"Image processing error: {str(e)}")  # Debug log
                     raise
             
         except Exception as e:

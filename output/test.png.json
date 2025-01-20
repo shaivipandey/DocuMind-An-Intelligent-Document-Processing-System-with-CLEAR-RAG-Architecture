@@ -1,0 +1,19 @@
+{
+  "filename": "test.png",
+  "file_type": "image",
+  "metadata": {
+    "format": "PNG",
+    "mode": "L",
+    "size": [
+      850,
+      380
+    ],
+    "width": 850,
+    "height": 380,
+    "creation_time": "2025-01-19T22:28:38.753618",
+    "modification_time": "2025-01-19T22:28:38.753618",
+    "file_size": 15079
+  },
+  "text_length": 87,
+  "status": "processed"
+}

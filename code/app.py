@@ -153,13 +153,13 @@ with st.sidebar:
     st.subheader("How to Use")
     st.write("""
     1. Enter your OpenRouter API key
-    2. Upload a PDF or HTML document
+    2. Upload a PDF, HTML, or image document
     3. Click 'Generate Summary' or ask questions
     """)
     
     st.subheader("Features")
     st.write("""
-    - PDF and HTML document processing
+    - PDF, HTML, and image document processing
     - AI-powered summarization
     - Question answering
     - Easy-to-use interface
@@ -169,7 +169,7 @@ with st.sidebar:
 col1, col2 = st.columns([3, 1])
 with col1:
     st.subheader("1. Upload Your Document")
-    uploaded_file = st.file_uploader("Choose a PDF or HTML file", type=["pdf", "html", "htm"])
+    uploaded_file = st.file_uploader("Choose a PDF, HTML, or image file", type=["pdf", "html", "htm", "png", "jpg", "jpeg", "tiff", "bmp"])
 with col2:
     st.subheader("Reset")
     if st.button("Clear Document"):
@@ -219,4 +219,4 @@ if uploaded_file is not None:
                 height=300
             )
 else:
-    st.info("👆 Upload a PDF or HTML file to get started!")
+    st.info("👆 Upload a PDF, HTML, or image file to get started!")
